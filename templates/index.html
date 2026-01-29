@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Asisten Virtual - Arka 57 motor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            background: #f5f5f5;
+        }
+        h2 {
+            text-align: center;
+        }
+        #chat-box {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            height: 400px;
+            overflow-y: auto;
+        }
+        .msg {
+            margin-bottom: 12px;
+        }
+        .user {
+            text-align: right;
+        }
+        .user span {
+            background: #0084ff;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 16px;
+            display: inline-block;
+        }
+        .bot span {
+            background: #e4e6eb;
+            padding: 8px 12px;
+            border-radius: 16px;
+            display: inline-block;
+        }
+        #input-area {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        #message {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Asisten Virtual - 
+    
+    </h2>
+    <div id="chat-box"></div>
+
+    <div id="input-area">
+        <input type="text" id="message" placeholder="Tulis pertanyaan tentang Arka 57 motor..." />
+        <button onclick="sendMessage()">Kirim</button>
+    </div>
+
+    <script>
+        // Local FAQ data (fallback ketika server tidak tersedia)
+        const FAQS = [
+            {
+                "tag": "jam_operasional",
+                "keywords": ["jam buka", "jam operasional", "buka jam berapa", "sampai jam berapa", "tutup jam berapa"],
+                "answer": "Bengkel Arka 57 motor buka setiap hari dari jam 08.00 sampai jam 21.00 WIB."
+            },
+            {
+                "tag": "alamat",
+                "keywords": ["alamat", "lokasi", "di mana", "dimana", "maps", "pagongan"],
+                "answer": "Bengkel Arka 57 motor buka setiap hari dari jam 08.00 sampai jam 21.00 WIB."
+            },
+            {
+                "tag": "cara_order",
+                "keywords": ["cara order", "cara pesan", "beli bagaimana", "order dimana", "order lewat apa", "pesan lewat apa"],
+                "answer": "Cara order di Arka 57 motor:\n• Tokopedia\n• Shopee\n• WhatsApp: 0895417804158\n• Datang langsung ke alamat kami di desa pagongan , kab tegal."
+            },
+            {
+                "tag": "produk",
+                "keywords": ["jual apa saja", "produk apa saja", "barang apa saja", "servis ringan", "sperpat", "aksesoris", "bor up"],
+                "answer": "Bengkel Arka 57 motor buka setiap hari dari jam 08.00 sampai jam 21.00 WIB."
+            }
+        ];
+
+        const BAD_WORDS = new Set(["anjing", "tolol", "bangsat", "idiot", "goblok", "babi", "kontol", "memek", "brengsek", "bacot"]);
+
+        function _clean_text(s) {
+            return (s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ");
+        }
+
+        function getLocalReply(user_message) {
+            const text = (user_message || "").trim();
+            const normalized = _clean_text(text);
+            const tokens = normalized.split(/\s+/).filter(Boolean);
+
+            // 0. kata kasar
+            if (tokens.some(t => BAD_WORDS.has(t))) {
+                return "Mohon gunakan bahasa yang sopan. Saya di sini untuk membantu.\nJika Anda punya pertanyaan tentang Arka 57 motor, silakan tanyakan dengan baik.";
+            }
+
+            // 1. FAQ match
+            for (const faq of FAQS) {
+                for (const kw of faq.keywords || []) {
+                    if (text.toLowerCase().includes(kw)) return faq.answer;
+                }
+            }
+
+            // 2. sapaan
+            const sapaan = ["halo", "hai", "assalamualaikum", "assalamu'alaikum", "pagi", "siang", "sore", "malam"];
+            if (sapaan.some(s => text.toLowerCase().includes(s))) {
+                return "Halo, selamat datang di Arka 57 motor 👋\nSilakan tanya seputar jam operasional, alamat, cara order, atau produk kami.";
+            }
+
+            // default
+            return "Maaf, saya belum menemukan informasi itu di database Arka 57 motor.\nCoba tanyakan dengan kalimat lain atau hubungi WhatsApp 0895417804158 ya 😊";
+        }
+
+        const chatBox = document.getElementById("chat-box");
+        const input = document.getElementById("message");
+
+        function addMessage(text, sender) {
+            const div = document.createElement("div");
+            div.className = "msg " + sender;
+            div.innerHTML = `<span>${text.replace(/\n/g, "<br>")}</span>`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage(text, "user");
+            input.value = "";
+
+            try {
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: text })
+                });
+
+                if (!response.ok) {
+                    const body = await response.text();
+                    console.error('Fetch error', response.status, body);
+                    addMessage(`Terjadi kesalahan server (${response.status}).`, "bot");
+                    return;
+                }
+
+                const data = await response.json();
+                addMessage(data.reply, "bot");
+            } catch (err) {
+                console.error('Network or parsing error', err);
+                // Fallback: gunakan handler lokal sehingga Anda bisa menguji chatbot tanpa server
+                const local = getLocalReply(text);
+                addMessage(local, "bot");
+            }
+        }
+
+        // Enter = kirim
+        input.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") sendMessage();
+        });
+
+        // Pesan pembuka
+        addMessage(
+            "Halo, saya asisten virtual arka 57 motor 👋<br>" +
+            "Silakan tanya: jam buka, alamat, cara order, atau produk yang tersedia.",
+            "bot"
+        );
+    </script>
+</body>
+</html>

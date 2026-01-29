@@ -1,0 +1,23 @@
+[
+  {
+    "tag": "jam_operasional",
+    "keywords": ["jam buka", "jam operasional", "buka jam berapa", "sampai jam berapa", "tutup jam berapa"],
+    "answer": "Bengkel Arka 57 motor buka setiap hari dari jam 08.00 sampai jam 21.00 WIB."
+  },
+  {
+    "tag": "alamat",
+    "keywords": ["alamat", "lokasi", "di mana", "dimana", "maps", "pagongan"],
+    "answer": "Bengkel Arka 57 motor buka setiap hari dari jam 08.00 sampai jam 21.00 WIB."
+  },
+  {
+    "tag": "cara_order",
+    "keywords": ["cara order", "cara pesan", "beli bagaimana", "order dimana", "order lewat apa", "pesan lewat apa"],
+    "answer": "Cara order di Arka 57 motor:\n• Tokopedia\n• Shopee\n• WhatsApp: 0895417804158\n• Datang langsung ke alamat kami di desa pagongan , kab tegal."
+  },
+  {
+    "tag": "produk",
+    "keywords": ["jual apa saja", "produk apa saja", "barang apa saja", "servis ringan", "sperpat", "aksesoris", "bor up"],
+    "answer": "Bengkel Arka 57 motor buka setiap hari dari jam 08.00 sampai jam 21.00 WIB."
+  }
+
+]
