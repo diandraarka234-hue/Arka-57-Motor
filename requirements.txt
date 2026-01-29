@@ -2,4 +2,4 @@ Flask
 python-telegram-bot==20.7
 langchain
 requests
-python-dontev
+python-dotenv
